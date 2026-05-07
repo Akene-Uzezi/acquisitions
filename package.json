@@ -1,0 +1,36 @@
+{
+  "name": "acquisitions",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node dist/index.js",
+    "dev": "nodemon",
+    "build": "tsc",
+    "commit": "sh commit.sh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Akene-Uzezi/acquisitions.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/Akene-Uzezi/acquisitions/issues"
+  },
+  "homepage": "https://github.com/Akene-Uzezi/acquisitions#readme",
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.6.0",
+    "nodemon": "^3.1.14",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.3"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1"
+  }
+}
