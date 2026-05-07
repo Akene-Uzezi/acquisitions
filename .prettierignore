@@ -1,0 +1,7 @@
+node_modules/
+coverage/
+logs/
+dist/
+build/
+*.log
+package-lock.json
