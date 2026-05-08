@@ -16,6 +16,7 @@ A robust RESTful API for managing user acquisitions, built with Node.js, Express
 ## 🛠 Tech Stack
 
 ### Core Technologies
+
 - **Runtime**: Node.js (ES Modules)
 - **Framework**: Express.js v5
 - **Language**: TypeScript
@@ -23,12 +24,14 @@ A robust RESTful API for managing user acquisitions, built with Node.js, Express
 - **ORM**: Drizzle ORM
 
 ### Security & Authentication
+
 - **JWT**: JSON Web Tokens for session management
 - **Bcrypt**: Password hashing and verification
 - **Helmet**: Security headers
 - **CORS**: Cross-origin resource sharing
 
 ### Development & Quality
+
 - **Linting**: ESLint with TypeScript support
 - **Formatting**: Prettier
 - **Logging**: Winston + Morgan
@@ -44,12 +47,14 @@ A robust RESTful API for managing user acquisitions, built with Node.js, Express
 ## 🚀 Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/Akene-Uzezi/acquisitions.git
    cd acquisitions
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
@@ -70,6 +75,7 @@ A robust RESTful API for managing user acquisitions, built with Node.js, Express
 4. **Database Setup**
 
    Generate and run database migrations:
+
    ```bash
    npm run db:generate
    npm run db:migrate
@@ -83,15 +89,19 @@ A robust RESTful API for managing user acquisitions, built with Node.js, Express
 ## 🏃‍♂️ Running the Application
 
 ### Development Mode
+
 ```bash
 npm run dev
 ```
+
 Starts the server with hot-reloading using Nodemon.
 
 ### Production Mode
+
 ```bash
 npm start
 ```
+
 Runs the compiled JavaScript from the `dist` directory.
 
 The server will start on `http://localhost:3000` (or your configured PORT).
@@ -99,6 +109,7 @@ The server will start on `http://localhost:3000` (or your configured PORT).
 ## 📚 API Documentation
 
 ### Base URL
+
 ```
 http://localhost:3000/api
 ```
@@ -106,11 +117,15 @@ http://localhost:3000/api
 ### Health Check Endpoints
 
 #### GET `/`
+
 Basic health check endpoint.
+
 - **Response**: `Hello from acquisitions!`
 
 #### GET `/health`
+
 Detailed health information.
+
 - **Response**:
   ```json
   {
@@ -121,7 +136,9 @@ Detailed health information.
   ```
 
 #### GET `/api`
+
 API status check.
+
 - **Response**:
   ```json
   {
@@ -132,9 +149,11 @@ API status check.
 ### Authentication Endpoints
 
 #### POST `/api/auth/register`
+
 Register a new user account.
 
 **Request Body**:
+
 ```json
 {
   "name": "John Doe",
@@ -145,6 +164,7 @@ Register a new user account.
 ```
 
 **Response (201)**:
+
 ```json
 {
   "message": "User Registered",
@@ -158,15 +178,18 @@ Register a new user account.
 ```
 
 **Validation Rules**:
+
 - `name`: 2-255 characters, required
 - `email`: Valid email format, required, unique
 - `password`: 6-128 characters, required
 - `role`: Either "user" or "admin", defaults to "user"
 
 #### POST `/api/auth/login`
+
 Authenticate and login a user.
 
 **Request Body**:
+
 ```json
 {
   "email": "john@example.com",
@@ -175,6 +198,7 @@ Authenticate and login a user.
 ```
 
 **Response (200)**:
+
 ```json
 {
   "message": "User Logged In",
@@ -188,13 +212,16 @@ Authenticate and login a user.
 ```
 
 **Error Responses**:
+
 - `400`: Validation failed
 - `401`: Invalid credentials
 
 #### POST `/api/auth/logout`
+
 Logout the current user by clearing the authentication cookie.
 
 **Response (200)**:
+
 ```json
 {
   "message": "User Logged Out"
@@ -203,19 +230,19 @@ Logout the current user by clearing the authentication cookie.
 
 ## 🛠 Development Scripts
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start development server with hot-reload |
-| `npm run build` | Compile TypeScript to JavaScript |
-| `npm run start` | Start production server |
-| `npm run lint` | Run ESLint code analysis |
-| `npm run lint:fix` | Auto-fix ESLint issues |
-| `npm run format` | Format code with Prettier |
-| `npm run format:check` | Check code formatting |
-| `npm run db:generate` | Generate database schema from Drizzle |
-| `npm run db:migrate` | Run database migrations |
-| `npm run db:studio` | Open Drizzle Studio for database management |
-| `npm run commit` | Interactive git commit with staging |
+| Command                | Description                                 |
+| ---------------------- | ------------------------------------------- |
+| `npm run dev`          | Start development server with hot-reload    |
+| `npm run build`        | Compile TypeScript to JavaScript            |
+| `npm run start`        | Start production server                     |
+| `npm run lint`         | Run ESLint code analysis                    |
+| `npm run lint:fix`     | Auto-fix ESLint issues                      |
+| `npm run format`       | Format code with Prettier                   |
+| `npm run format:check` | Check code formatting                       |
+| `npm run db:generate`  | Generate database schema from Drizzle       |
+| `npm run db:migrate`   | Run database migrations                     |
+| `npm run db:studio`    | Open Drizzle Studio for database management |
+| `npm run commit`       | Interactive git commit with staging         |
 
 ## 🏗 Project Structure
 
@@ -258,6 +285,7 @@ src/
 ## 📊 Database Schema
 
 ### Users Table
+
 ```sql
 CREATE TABLE users (
   id SERIAL PRIMARY KEY,
@@ -282,6 +310,7 @@ Currently, no test suite is configured. To add testing:
 ## 🚢 Deployment
 
 ### Environment Variables for Production
+
 ```env
 NODE_ENV=production
 DATABASE_URL=your_production_database_url
@@ -290,6 +319,7 @@ PORT=3000
 ```
 
 ### Build and Deploy Steps
+
 ```bash
 npm run build
 npm run db:migrate  # Run migrations on production DB
@@ -297,6 +327,7 @@ npm start
 ```
 
 ### Recommended Hosting
+
 - **Vercel/Netlify**: For serverless deployment
 - **Railway/Render**: For full Node.js hosting
 - **AWS/GCP/Azure**: For enterprise deployments
@@ -311,25 +342,8 @@ npm start
 6. Open a Pull Request
 
 ### Code Style
+
 - Follow ESLint and Prettier configurations
 - Use TypeScript strict mode
 - Write clear commit messages
 - Add JSDoc comments for complex functions
-
-## 📝 License
-
-This project is licensed under the ISC License - see the [LICENSE](LICENSE) file for details.
-
-## 🆘 Support
-
-- **Issues**: [GitHub Issues](https://github.com/Akene-Uzezi/acquisitions/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/Akene-Uzezi/acquisitions/discussions)
-
-## 🙏 Acknowledgments
-
-- [Express.js](https://expressjs.com/) - Web framework
-- [Drizzle ORM](https://orm.drizzle.team/) - Type-safe ORM
-- [Neon](https://neon.tech/) - Serverless PostgreSQL
-- [JWT.io](https://jwt.io/) - JSON Web Tokens
-- [Zod](https://zod.dev/) - TypeScript-first schema validation</content>
-<parameter name="filePath">/home/emperor/Desktop/acquisitions/README.md
