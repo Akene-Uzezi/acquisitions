@@ -40,53 +40,147 @@ A robust RESTful API for managing user acquisitions, built with Node.js, Express
 
 ## 📋 Prerequisites
 
-- Node.js 18+ (with npm)
+- Node.js 18+ (with npm) - for local development without Docker
 - PostgreSQL database (Neon recommended for serverless)
+- Docker & Docker Compose - for containerized development and production
 - Git
 
 ## 🚀 Installation
 
+### Option 1: Local Development (Non-Docker)
+
 1. **Clone the repository**
 
-   ```bash
-   git clone https://github.com/Akene-Uzezi/acquisitions.git
-   cd acquisitions
-   ```
+    ```bash
+    git clone https://github.com/Akene-Uzezi/acquisitions.git
+    cd acquisitions
+    ```
 
 2. **Install dependencies**
 
-   ```bash
-   npm install
-   ```
+    ```bash
+    npm install
+    ```
 
 3. **Environment Configuration**
 
-   Create a `.env` file in the root directory:
+    Create a `.env` file in the root directory:
 
-   ```env
-   DATABASE_URL=your_neon_database_connection_string
-   JWT_SECRET=your_super_secret_jwt_key_here
-   PORT=3000
-   NODE_ENV=development
-   ```
+    ```env
+    DATABASE_URL=your_neon_database_connection_string
+    JWT_SECRET=your_super_secret_jwt_key_here
+    PORT=3000
+    NODE_ENV=development
+    ```
 
-   > **Note**: Get your DATABASE_URL from Neon Console. For JWT_SECRET, use a strong, random string.
+    > **Note**: Get your DATABASE_URL from Neon Console. For JWT_SECRET, use a strong, random string.
 
 4. **Database Setup**
 
-   Generate and run database migrations:
+    Generate and run database migrations:
 
-   ```bash
-   npm run db:generate
-   npm run db:migrate
-   ```
+    ```bash
+    npm run db:generate
+    npm run db:migrate
+    ```
 
 5. **Build the application**
+    ```bash
+    npm run build
+    ```
+
+### Option 2: Docker Development
+
+See the [🐳 Docker Setup](#-docker-setup) section below for containerized development with Neon Local.
+
+## 🐳 Docker Setup
+
+This application is fully dockerized with different configurations for development and production environments.
+
+### Development Environment with Neon Local
+
+For local development, we use **Neon Local** which provides a local PostgreSQL instance that mimics Neon's serverless features, including automatic ephemeral branches for development and testing.
+
+**Prerequisites:**
+- Docker and Docker Compose installed
+- At least 2GB RAM allocated to Docker
+
+**Steps:**
+
+1. **Start the development environment:**
+
    ```bash
-   npm run build
+   docker-compose -f docker-compose.dev.yml up --build
    ```
 
-## 🏃‍♂️ Running the Application
+   This command:
+   - Pulls and starts the `neondatabase/neon:latest` container
+   - Builds your application container
+   - Mounts your source code for live reloading
+   - Connects your app to Neon Local at `postgres://postgres:postgres@neon-local:5432/postgres`
+
+2. **Access your application:**
+
+   - API: http://localhost:3000
+   - Neon Local proxy: localhost:5432
+
+3. **Database operations:**
+
+   If you need to run migrations or use Drizzle Studio, you can access the app container:
+
+   ```bash
+   docker-compose -f docker-compose.dev.yml exec app npm run db:migrate
+   docker-compose -f docker-compose.dev.yml exec app npm run db:studio
+   ```
+
+4. **Stop the environment:**
+
+   ```bash
+   docker-compose -f docker-compose.dev.yml down
+   ```
+
+   Data persists in a named volume `neon-data`.
+
+### Production Environment with Neon Cloud
+
+For production, the application connects directly to your Neon Cloud database.
+
+**Prerequisites:**
+- Your Neon Cloud DATABASE_URL
+- Docker and Docker Compose
+
+**Steps:**
+
+1. **Set your production environment variables:**
+
+   Copy `.env.production` and fill in your actual DATABASE_URL:
+
+   ```bash
+   cp .env.production .env
+   # Edit .env with your production DATABASE_URL
+   ```
+
+2. **Build and deploy:**
+
+   ```bash
+   docker-compose -f docker-compose.prod.yml up --build -d
+   ```
+
+   Or pass the DATABASE_URL as an environment variable:
+
+   ```bash
+   DATABASE_URL="your-neon-cloud-url" docker-compose -f docker-compose.prod.yml up --build -d
+   ```
+
+3. **Verify deployment:**
+
+   ```bash
+   docker-compose -f docker-compose.prod.yml logs app
+   ```
+
+The application will be available at http://localhost:3000 (configure your reverse proxy for production domains).
+
+## 🏃‍♂️ Running the Application (Non-Docker)
 
 ### Development Mode
 

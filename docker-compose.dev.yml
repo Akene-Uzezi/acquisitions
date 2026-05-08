@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@neon-local:5432/postgres
+      - PORT=3000
+    depends_on:
+      - neon-local
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: npm run dev
+
+  neon-local:
+    image: neondatabase/neon:latest
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - neon-data:/var/lib/postgresql/data
+
+volumes:
+  neon-data:
