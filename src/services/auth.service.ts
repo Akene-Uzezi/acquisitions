@@ -51,7 +51,9 @@ export const authenticateUser = async (email: string, password: string) => {
     const { password: _, ...userWithoutPassword } = user;
     return userWithoutPassword;
   } catch (e) {
-    logger.error(`Error authenticating user: ${e instanceof Error ? e.message : e}`);
+    logger.error(
+      `Error authenticating user: ${e instanceof Error ? e.message : e}`
+    );
     throw e;
   }
 };
@@ -59,7 +61,7 @@ export const authenticateUser = async (email: string, password: string) => {
 export const createUser = async (userData: CreateUser) => {
   try {
     const { name, email, password, role } = userData;
-    const existingUser = db
+    const existingUser = await db
       .select()
       .from(users)
       .where(eq(users.email, email))
@@ -83,8 +85,8 @@ export const createUser = async (userData: CreateUser) => {
         createdAt: users.createdAt,
       });
 
-    return newUser;
     logger.info(`User ${newUser.email} created successfully`);
+    return newUser;
   } catch (e) {
     logger.error(`Error creating user ${e}`);
     throw e;
