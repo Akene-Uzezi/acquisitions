@@ -8,3 +8,4 @@ logs/
 .neon_local/
 .kilo/
 .kilocode/
+coverage/
