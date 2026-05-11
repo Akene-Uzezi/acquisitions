@@ -27,7 +27,7 @@ app.use(securityMiddleware);
 
 app.get('/', (req: Request, res: Response) => {
   logger.info('Hello from acquisitions!');
-  res.status(200).send('Hello from acquisitions!');
+  res.status(200).json({ message: 'Hello from acquisitions!' });
 });
 
 app.get('/health', (req: Request, res: Response) => {

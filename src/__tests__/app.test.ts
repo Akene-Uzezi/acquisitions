@@ -2,6 +2,15 @@ import request from 'supertest';
 import app from '../app.js';
 
 describe('API Endpoints', () => {
+  describe('GET /', () => {
+    it('should return a welcome message', async () => {
+      const response = await request(app).get('/').expect(200);
+      expect(response.body).toHaveProperty(
+        'message',
+        'Hello from acquisitions!'
+      );
+    });
+  });
   describe('GET /health', () => {
     it('should return health status', async () => {
       const response = await request(app).get('/health').expect(200);

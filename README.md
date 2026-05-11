@@ -7,39 +7,41 @@ A robust RESTful API for managing user acquisitions, built with Node.js, Express
 - **User Authentication**: Secure user registration and login with JWT tokens
 - **User Management**: Full CRUD operations for user profiles (Create, Read, Update, Delete)
 - **Role-Based Access**: Admin and user roles with granular permissions for updating and deleting users
-- **Password Security**: Bcrypt hashing for password storage
+- **Password Security**: Bcrypt hashing (10 rounds) for password storage
 - **Database Integration**: PostgreSQL with Drizzle ORM for type-safe database operations
-- **Security**: Helmet for security headers, CORS support, Arcjet rate limiting, and HTTP-only cookies
-- **Logging**: Winston-based logging with Morgan HTTP request logging
-- **Validation**: Zod schema validation for request data
-- **Type Safety**: Full TypeScript support with strict typing
-- **Development Tools**: ESLint, Prettier, and automated linting/formatting
+- **Security**: Helmet for security headers, CORS support, Arcjet rate limiting with bot detection and attack shielding
+- **Logging**: Winston-based structured logging with Morgan HTTP request logging
+- **Validation**: Zod schema validation for all request data
+- **Type Safety**: Full TypeScript support with strict mode and NodeNext module resolution
+- **Development Tools**: ESLint, Prettier, Nodemon hot-reload, and automated linting/formatting scripts
 
 ## 🛠 Tech Stack
 
 ### Core Technologies
 
-- **Runtime**: Node.js (ES Modules)
+- **Runtime**: Node.js 18+ (ES Modules)
 - **Framework**: Express.js v5
-- **Language**: TypeScript
-- **Database**: PostgreSQL (Neon Serverless)
-- **ORM**: Drizzle ORM
+- **Language**: TypeScript 6.x (strict mode, NodeNext module resolution)
+- **Database**: PostgreSQL (Neon Serverless / Neon Local)
+- **ORM**: Drizzle ORM v0.45 with `drizzle-kit` for migrations
 
 ### Security & Authentication
 
-- **JWT**: JSON Web Tokens for session management
-- **Bcrypt**: Password hashing and verification
-- **Helmet**: Security headers
+- **JWT**: JSON Web Tokens for stateless session management (1-day expiry)
+- **Bcrypt**: Password hashing and verification (10 salt rounds)
+- **Helmet**: Security headers (CSP, HSTS, X-Frame-Options, etc.)
 - **CORS**: Cross-origin resource sharing
-- **Arcjet**: Rate limiting, bot detection, and attack shielding
+- **Arcjet**: Rate limiting, bot detection, and attack shielding (SQL injection, etc.)
+- **HTTP-Only Cookies**: JWT tokens stored securely in cookies (15-min maxAge, sameSite=strict)
 
 ### Development & Quality
 
 - **Linting**: ESLint with TypeScript support
 - **Formatting**: Prettier
-- **Logging**: Winston + Morgan
-- **Validation**: Zod schemas
-- **Process Management**: Nodemon for development
+- **Logging**: Winston (JSON in production, colorized in development) + Morgan
+- **Validation**: Zod schemas with `safeParse()`
+- **Process Management**: Nodemon for development hot-reload
+- **Runtime Transpilation**: `tsx` for running TypeScript directly in development
 
 ## 📋 Prerequisites
 
@@ -67,7 +69,13 @@ A robust RESTful API for managing user acquisitions, built with Node.js, Express
 
 3. **Environment Configuration**
 
-    Create a `.env` file in the root directory:
+    Copy the example environment file and fill in your values:
+
+    ```bash
+    cp .env.example .env
+    ```
+
+    Required environment variables:
 
     ```env
     DATABASE_URL=your_neon_database_connection_string
@@ -77,7 +85,7 @@ A robust RESTful API for managing user acquisitions, built with Node.js, Express
     ARCJET_KEY=your_arcjet_key
     ```
 
-    > **Note**: Get your DATABASE_URL from Neon Console. For JWT_SECRET, use a strong, random string. Get your ARCJET_KEY from [arcjet.com](https://app.arcjet.com).
+    > **Note**: Get your `DATABASE_URL` from the [Neon Console](https://neon.tech). For `JWT_SECRET`, use a strong, random string (e.g., `openssl rand -base64 32`). Get your `ARCJET_KEY` from [arcjet.com](https://app.arcjet.com).
 
 4. **Database Setup**
 
@@ -88,9 +96,17 @@ A robust RESTful API for managing user acquisitions, built with Node.js, Express
     npm run db:migrate
     ```
 
-5. **Build the application**
+5. **Build and Start**
+
     ```bash
+    # Build TypeScript to JavaScript
     npm run build
+
+    # Start production server
+    npm start
+
+    # Or start development server with hot-reload
+    npm run dev
     ```
 
 ### Option 2: Docker Development
@@ -120,7 +136,7 @@ For local development, we use **Neon Local** which provides a local PostgreSQL i
     This command:
     - Pulls and starts the `neondatabase/neon:latest` container
     - Builds your application container
-    - Mounts your source code for live reloading
+    - Mounts your source code for live reloading via Nodemon
     - Connects your app to Neon Local at `postgres://postgres:postgres@neon-local:5432/postgres`
 
 2. **Access your application:**
@@ -150,14 +166,14 @@ For local development, we use **Neon Local** which provides a local PostgreSQL i
 For production, the application connects directly to your Neon Cloud database.
 
 **Prerequisites:**
-- Your Neon Cloud DATABASE_URL
+- Your Neon Cloud `DATABASE_URL`
 - Docker and Docker Compose
 
 **Steps:**
 
 1. **Set your production environment variables:**
 
-    Copy `.env.production` and fill in your actual DATABASE_URL and ARCJET_KEY:
+    Copy `.env.production` and fill in your actual `DATABASE_URL` and `ARCJET_KEY`:
 
     ```bash
     cp .env.production .env
@@ -170,7 +186,7 @@ For production, the application connects directly to your Neon Cloud database.
     docker-compose -f docker-compose.prod.yml up --build -d
     ```
 
-    Or pass the DATABASE_URL as an environment variable:
+    Or pass the `DATABASE_URL` as an environment variable:
 
     ```bash
     DATABASE_URL="your-neon-cloud-url" docker-compose -f docker-compose.prod.yml up --build -d
@@ -192,7 +208,7 @@ For production, the application connects directly to your Neon Cloud database.
 npm run dev
 ```
 
-Starts the server with hot-reloading using Nodemon.
+Starts the server with hot-reloading using Nodemon and `tsx` for runtime TypeScript transpilation.
 
 ### Production Mode
 
@@ -240,7 +256,7 @@ API status check.
 - **Response**:
   ```json
   {
-    "message": "Acquisition API is running"
+    "message": "Acquisitions API is running"
   }
   ```
 
@@ -280,7 +296,12 @@ Register a new user account.
 - `name`: 2-255 characters, required
 - `email`: Valid email format, required, unique
 - `password`: 6-128 characters, required
-- `role`: Either "user" or "admin", defaults to "user"
+- `role`: Either `"user"` or `"admin"`, defaults to `"user"`
+
+**Error Responses**:
+
+- `400`: Validation failed
+- `409`: User with this email already exists
 
 #### POST `/api/auth/login`
 
@@ -309,6 +330,8 @@ Authenticate and login a user.
 }
 ```
 
+A JWT token is set in an HTTP-only, secure cookie upon successful login.
+
 **Error Responses**:
 
 - `400`: Validation failed
@@ -332,7 +355,9 @@ All user endpoints require authentication. The authenticated user's identity is 
 
 #### GET `/api/users`
 
-Retrieve all users (admin only recommended).
+Retrieve all users (admin recommended).
+
+- **Auth**: Required
 
 **Response (200)**:
 
@@ -356,6 +381,8 @@ Retrieve all users (admin only recommended).
 #### GET `/api/users/:id`
 
 Retrieve a single user by ID.
+
+- **Auth**: Required
 
 **Path Parameters**:
 
@@ -382,11 +409,14 @@ Retrieve a single user by ID.
 **Error Responses**:
 
 - `400`: Invalid ID format
+- `401`: Authentication required
 - `404`: User not found
 
 #### PUT `/api/users/:id`
 
 Update a user's information.
+
+- **Auth**: Required (own profile or admin)
 
 **Path Parameters**:
 
@@ -436,6 +466,8 @@ Update a user's information.
 
 Delete a user by ID.
 
+- **Auth**: Required (own profile or admin)
+
 **Path Parameters**:
 
 | Parameter | Type   | Required | Description       |
@@ -475,58 +507,63 @@ Delete a user by ID.
 | `npm run db:generate`  | Generate database schema from Drizzle       |
 | `npm run db:migrate`   | Run database migrations                     |
 | `npm run db:studio`    | Open Drizzle Studio for database management |
+| `npm run test`         | Run Jest test suite                         |
 | `npm run commit`       | Interactive git commit with staging         |
 
 ## 🏗 Project Structure
 
 ```
 src/
-├── app.ts              # Express application setup and middleware
-├── server.ts           # Server entry point
-├── index.ts            # Application bootstrap
-├── config/             # Configuration files
-│   ├── database.ts     # Database connection (Drizzle + Neon)
-│   ├── logger.ts       # Winston logger configuration
-│   └── arcjet.ts       # Arcjet rate limiting configuration
-├── controllers/        # Request handlers
-│   ├── auth.controller.ts   # Authentication endpoints
-│   └── user.controller.ts   # User CRUD endpoints
-├── models/             # Database schema definitions
-│   └── user.model.ts   # User table schema
-├── routes/             # API route definitions
-│   ├── auth.routes.ts  # Authentication routes
-│   └── users.routes.ts # User CRUD routes
-├── services/           # Business logic layer
-│   ├── auth.service.ts # Authentication services
+├── app.ts                # Express application setup and middleware
+├── server.ts             # Server entry point
+├── index.ts              # Application bootstrap (dotenv config)
+├── config/               # Configuration files
+│   ├── database.ts       # Database connection (Drizzle + Neon)
+│   ├── logger.ts         # Winston logger configuration
+│   └── arcjet.ts         # Arcjet rate limiting & security config
+├── controllers/          # Request handlers
+│   ├── auth.controller.ts    # Authentication endpoints
+│   └── user.controller.ts    # User CRUD endpoints
+├── middleware/           # Custom middleware
+│   └── security.middleware.ts # Arcjet security & rate limiting middleware
+├── models/               # Database schema definitions
+│   └── user.model.ts    # User table schema (Drizzle)
+├── routes/               # API route definitions
+│   ├── auth.routes.ts   # Authentication routes
+│   └── users.routes.ts  # User CRUD routes
+├── services/             # Business logic layer
+│   ├── auth.service.ts  # Authentication services (hash, compare, create, authenticate)
 │   └── users.services.ts # User CRUD services
-├── types/              # TypeScript type definitions
-│   ├── service.types.ts   # Service-related interfaces
-│   ├── express.d.ts       # Express Request augmentation
-│   └── middleware.types.ts # Middleware type definitions
-├── utils/              # Utility functions
-│   ├── cookies.ts      # Cookie management
-│   └── jwt.ts          # JWT token handling
-└── validations/        # Input validation schemas
-    ├── auth.validation.ts  # Authentication validation
-    ├── users.validation.ts # User CRUD validation schemas
-    └── format.ts       # Validation error formatting
+├── types/                # TypeScript type definitions
+│   ├── service.types.ts   # Service-related interfaces (CreateUser, UserResponse)
+│   ├── express.d.ts       # Express Request augmentation (req.user)
+│   └── middleware.types.ts # Middleware type definitions (Arcjet)
+├── utils/                # Utility functions
+│   ├── cookies.ts       # Cookie management (set, clear, get)
+│   └── jwt.ts           # JWT token handling (sign, verify)
+├── validations/          # Input validation schemas (Zod)
+│   ├── auth.validation.ts  # Authentication validation (register, login)
+│   ├── users.validation.ts # User CRUD validation (id, update)
+│   └── format.ts        # Validation error formatting
+└── __tests__/            # Integration tests
+    └── app.test.ts      # Health check and API status tests
 ```
 
 ## 🔒 Security Features
 
-- **Password Hashing**: All passwords are hashed using bcrypt with salt rounds
-- **JWT Tokens**: Secure token-based authentication with expiration (1 day)
-- **HTTP-Only Cookies**: Session tokens stored in secure, HTTP-only cookies (15 min maxAge)
-- **Security Headers**: Helmet provides comprehensive security headers
+- **Password Hashing**: All passwords are hashed using bcrypt with 10 salt rounds
+- **JWT Tokens**: Stateless authentication with 1-day token expiry
+- **HTTP-Only Cookies**: Session tokens stored in secure, HTTP-only cookies (15-min maxAge, `sameSite=strict`)
+- **Security Headers**: Helmet provides comprehensive security headers (CSP, HSTS, etc.)
 - **CORS**: Configurable cross-origin resource sharing
-- **Rate Limiting**: Arcjet provides sliding window rate limits per user role
-- **Bot Detection**: Arcjet blocks automated requests
-- **Attack Shielding**: Arcjet protects against SQL injection and common attacks
+- **Rate Limiting**: Arcjet sliding window rate limits per role (Guest: 5/min, User: 10/min, Admin: 20/min)
+- **Bot Detection**: Arcjet automatically blocks automated/bot requests
+- **Attack Shielding**: Arcjet protects against SQL injection and common web attacks
 - **Input Validation**: Zod schemas prevent malformed data at the controller layer
 - **Authorization**: Role-based access control on all user mutation endpoints
-- **Error Handling**: Sensitive information not leaked in error responses
+- **Error Handling**: Sensitive information not leaked in error responses; generic 500 for unknown errors
 
-## 📊 Database Schema
+## 🗄 Database Schema
 
 ### Users Table
 
@@ -544,12 +581,24 @@ CREATE TABLE users (
 
 ## 🧪 Testing
 
-Currently, no test suite is configured. To add testing:
+The project includes an integration test suite using Jest and Supertest.
 
-1. Install testing framework (Jest, Vitest, etc.)
-2. Add test scripts to `package.json`
-3. Create test files in `__tests__/` directory
-4. Configure test database for isolated testing
+**Run tests:**
+
+```bash
+npm run test
+```
+
+**Test configuration** (`jest.config.ts`):
+- Uses `ts-jest` for TypeScript support
+- Test files are located in `src/__tests__/`
+
+Current test coverage includes:
+- Health check endpoint (`GET /health`)
+- API status endpoint (`GET /api`)
+- 404 handling for nonexistent routes
+
+To add more tests, create new test files in `src/__tests__/` following the existing pattern.
 
 ## 🚢 Deployment
 
@@ -566,9 +615,24 @@ ARCJET_KEY=your_arcjet_key
 ### Build and Deploy Steps
 
 ```bash
+# Build TypeScript
 npm run build
-npm run db:migrate  # Run migrations on production DB
+
+# Run migrations on production database
+npm run db:migrate
+
+# Start the server
 npm start
+```
+
+### Docker Deployment
+
+```bash
+# Production (with existing .env)
+docker-compose -f docker-compose.prod.yml up --build -d
+
+# Or pass DATABASE_URL inline
+DATABASE_URL="your-neon-cloud-url" docker-compose -f docker-compose.prod.yml up --build -d
 ```
 
 ### Recommended Hosting
@@ -581,14 +645,15 @@ npm start
 
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature/your-feature`
-3. Make your changes and run tests: `npm run lint && npm run build`
-4. Commit your changes: `npm run commit`
-5. Push to your branch: `git push origin feature/your-feature`
-6. Open a Pull Request
+3. Make your changes and run lint + build: `npm run lint && npm run build`
+4. Run tests: `npm run test`
+5. Commit your changes: `npm run commit`
+6. Push to your branch: `git push origin feature/your-feature`
+7. Open a Pull Request
 
 ### Code Style
 
 - Follow ESLint and Prettier configurations
-- Use TypeScript strict mode
+- Use TypeScript strict mode with NodeNext module resolution
 - Write clear commit messages
 - Add JSDoc comments for complex functions
