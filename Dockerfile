@@ -1,24 +1,22 @@
-# Use the official Node.js 18 image as the base image
-FROM node:18-alpine
-
-# Set the working directory inside the container
+# Base stage — shared dependencies
+FROM node:18-alpine AS base
 WORKDIR /app
-
-# Copy package.json and package-lock.json (if available) to the working directory
 COPY package*.json ./
 
-# Install the dependencies
-RUN npm ci --only=production
-
-# Copy the TypeScript source code
-COPY src ./src
+# Development stage — used by docker-compose.dev.yml
+FROM base AS development
+RUN npm install
 COPY tsconfig.json ./
+COPY nodemon.json ./
+COPY src ./src
+EXPOSE 5173
+CMD ["npm", "run", "dev"]
 
-# Build the TypeScript code
+# Production stage
+FROM base AS production
+RUN npm ci --omit=dev
+COPY tsconfig.json ./
+COPY src ./src
 RUN npm run build
-
-# Expose the port the app runs on
 EXPOSE 3000
-
-# Command to run the application
 CMD ["npm", "start"]
