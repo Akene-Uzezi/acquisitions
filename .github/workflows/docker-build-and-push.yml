@@ -36,7 +36,8 @@ jobs:
           tags: |
             type=sha,prefix=commit-
             type=raw,value=latest,enable={{is_default_branch}}
-            type=raw,value=prod-${{ date 'YYYYMMDD-HHmmss' }}
+            # Use the built-in date formatting from the action
+            type=raw,value=prod-{{date 'YYYYMMDD-HHmmss'}}
 
       - name: Build and push
         uses: docker/build-push-action@v5
